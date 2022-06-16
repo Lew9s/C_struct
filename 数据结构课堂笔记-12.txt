@@ -1,0 +1,82 @@
+数据结构课堂笔记-12
+
+第2章：线性表，两种存储结构，顺序方式和链接方式，顺序表和链表
+链表：单链表、双链表，单链表：带头结点、不带头结点、带头结点的循环单链表，
+了解不带头结点的单链表
+
+第3章  栈和队列：2种特殊的线性表，特殊：允许插入和删除的位置进行了限定
+栈：只允许在同一端进行插入和删除。允许插入和删除的端，栈顶；另外一端，栈底。
+顺序方式存储：顺序栈（3种情况）
+链栈：用不带头结点的单链表存储
+
+队列：在一端插入，在另外一端删除。允许插入的端，队尾；允许删除的端，队头。
+front,rear
+顺序队列：用循环结构
+  队空：front==rear
+  队满：rear即将追上front
+链队列:
+   带头结点的单链表
+   front,rear
+   带头结点的循环单链表，循环队列。只设rear指针，不设front
+
+第4章  串
+字符串，字符数组存储。顺序方式存储。
+#include<string.h>
+strcat(s1,s2)
+strcpy(s1,s2)
+strlen(s)
+strcmp(s1,s2)
+
+'\0'=>ASCII值：0,表示空字符，作为字符串的结束标志
+' '
+NULL标识符常量，
+#define NULL 0
+NULL实际上就是0
+'\0'=>ASCII:0， <=>NULL
+为什么不把0写成NULL?
+NULL的目的是为了表示空地址，而不是为了表示数值0
+char *p=NULL;       char *p=0;
+int *q=NULL;
+int x=0,y;
+y=NULL;
+
+
+#include<stdio.h>
+//#include<string.h>
+int strLen(char *s){//求s指向的字符串的长度 ，用递归函数
+	if(*s=='\0') return 0;
+	else return 1+strLen(s+1);
+}
+int strLen2(char *s){//用循环语句来求s所指向的字符串长度
+	int len=0;
+	char *p=s; 
+	while(*p++)	len++;
+	return len;
+}
+void strCat(char *s1,char *s2){
+	char *p1=s1,*p2=s2;
+	while(*p1) p1++;
+	while(*p2) *p1++=*p2++;
+	*p1=*p2;
+}
+int main(){
+	char str[]="Hello,nice to meet you.";
+	char str2[100]="Yes.";
+	printf("strLen(str)=%d\n",strLen(str));
+	printf("strLen2(str)=%d\n",strLen2(str));
+	printf("空格字符的ASCII值=%d\n",' '-'\0');//判断空格字符是否与'\0'相等
+	printf("'a'字符的ASCII值=%d\n",'a'-'\0');
+	printf("'0'字符的ASCII值=%d\n",'0'-'\0');
+	strCat(str2,str);
+	//strcat(str2,str);
+	printf("%s,%s\n",str2,str);
+	return 0;
+}
+
+
+本章的重点是串的模式匹配，BF算法简单，易懂，效率低
+
+KMP算法，效率高，需要多花时间，画图解，理解。详见MOOC视频。
+
+
+

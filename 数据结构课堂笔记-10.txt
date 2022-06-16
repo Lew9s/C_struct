@@ -1,0 +1,137 @@
+数据结构课堂笔记-10
+为了有效地解决队列假上溢的情况，采用循环结构的顺序队列！
+初始化时，front=rear=Max-1,
+队空：front==rear
+入队时，rear要在循环意义下加1,即 ( rear+1)%Max=>rear
+出队时，front要在循环意义下加1,即 ( front+1)%Max=>front
+队满时，也出现了rear==front
+
+当front==rear时，无法区分到底是队空，还是队满！
+为了让front==rear作为队空的唯一条件，规定不允许队列真满！！！
+当rear即将追上front时(差一步)时，认为队满！
+当(rear+1)%Max==front时，我们认为队满！
+牺牲了一个元素的空间，表示队满
+
+循环意义下的顺序队列完整代码
+#include<stdio.h> 
+typedef int ElemType;
+#define Max 4
+typedef struct node{
+	ElemType data[Max];
+	int front,rear;//front队头元素左边位置的下标,rear队尾元素下标 
+}seQueue;
+seQueue * IniQueue(){
+	seQueue *sq=(seQueue *)malloc(sizeof(seQueue));
+	sq->rear=sq->front=Max-1;
+	return sq;
+}
+int EmptyQueue(seQueue * sq){
+	/*if(sq->front==sq->rear) return 1;
+	else return 0;*/
+	return (sq->front==sq->rear?1:0);
+}
+int enQueue(seQueue *sq,ElemType x){//入队 
+	if((sq->rear+1)%Max==sq->front) { printf("队满\n"); return 0;	}
+	sq->rear=(sq->rear+1)%Max;
+	sq->data[sq->rear]=x;
+	return 1;
+}
+int deQueue(seQueue *sq,ElemType *x){//出队 
+	if(sq->front==sq->rear){ printf("队空\n"); return 0;	}
+	sq->front=(sq->front+1)%Max;//此时的front恰好是原来的队头元素下标 
+	*x=sq->data[sq->front];
+	return 1;	
+}
+int getQueue(seQueue *sq,ElemType *x){//取队头元素 
+	if(sq->front==sq->rear){ printf("队空\n"); return 0;	}
+	*x=sq->data[(sq->front+1)%Max];
+	return 1;
+}
+void Destroy(seQueue *sq){	if(sq) free(sq);} 
+int main(){
+	ElemType x;
+	seQueue *sq=IniQueue();
+	printf("队空函数值=%d\n",EmptyQueue(sq));
+	printf("第1次将10入队，入队函数值=%d\n",enQueue(sq,10));
+	printf("第2次将20入队，入队函数值=%d\n",enQueue(sq,20));
+	printf("第3次将30入队，入队函数值=%d\n",enQueue(sq,30));
+	printf("第4次将40入队，入队函数值=%d\n",enQueue(sq,40));
+	printf("队空函数值=%d\n",EmptyQueue(sq));
+	printf("第1次取队头元素，取值函数值=%d\n",getQueue(sq,&x));//1
+	printf("x=%d\n",x);//x=10
+	printf("第1次出队，出队函数值=%d\n",deQueue(sq,&x));//1
+	printf("x=%d\n",x);//x=10
+	printf("第2次出队，出队函数值=%d\n",deQueue(sq,&x));//1
+	printf("x=%d\n",x);//x=20
+	printf("第3次出队，出队函数值=%d\n",deQueue(sq,&x));//1
+	printf("x=%d\n",x);//x=30
+	printf("队空函数值=%d\n",EmptyQueue(sq));//1
+	printf("再次取队头元素，取值函数值=%d\n",getQueue(sq,&x));//队空，0
+	Destroy(sq);
+	return 0;
+}
+
+data[],int rear,front
+
+用data[Max],只设rear和length变量，分别表示队尾元素的下标和队列长度(队列中元素的个数)
+编程实现循环意义下顺序队列的各种函数的算法代码。//不需要牺牲一个元素空间
+
+链队列：以链接方式存储的队列
+用带头结点的单链表存储队列
+定义结构体的结点数据类型
+
+
+出队：移花接木，并释放队头元素所在的结点，而是释放头结点(队头元素的前趋结点)
+简化算法 。
+
+typedef int ElemType;
+typedef struct node{
+	ElemType data;
+	struct node *next;
+}Node;
+typedef struct{
+	Node *front,*rear;
+}linkQueue;
+linkQueue * IniLinkQueue(){
+	linkQueue *lq;
+	lq=(linkQueue*)malloc(sizeof(linkQueue));
+	lq->rear=lq->front=(Node *)malloc(sizeof(Node));
+	lq->rear->next=NULL;
+	return lq;
+}
+int EmptyLinkQueue(linkQueue *lq){
+	if(lq->front==lq->rear) return 1;
+	else return 0;
+	//优化代码，课外自己改写 
+}
+void Destroy(linkQueue *lq){
+	Node *p=lq->front;
+	while(p){
+		lq->front=lq->front->next;
+		free(p);
+		p=lq->front;
+	} 
+}
+void enQueue(linkQueue *lq,ElemType x){
+	Node *s=(Node *)malloc(sizeof(Node));
+	s->data=x;
+	s->next=NULL;
+	lq->rear->next=s;
+	lq->rear=s;
+}
+int getQueue(linkQueue *lq,ElemType *x){
+	if(lq->front==lq->rear){printf("队空\n");return 0;	}
+	*x=lq->rear->data;
+	return 1;
+}
+int deQueue(linkQueue *lq,ElemType *x){
+	if(lq->front==lq->rear){printf("队空\n");return 0;	}
+	....
+	return 1;
+}
+
+
+
+
+
+

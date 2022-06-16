@@ -1,0 +1,128 @@
+数据结构课堂笔记-07
+
+数据结构--第2章的课外作业及实验任务：
+把顺序表、带头结点的单链表、不带头结点的单链表、带头结点的循环单链表(只设尾指针)分别进行定义，并编写主函数进行测试。
+此外，还要为不带头结点的单链表，编写合并函数(具体要求，以前在课堂上布置过)，并上机测试。
+
+撰写实验报告
+
+双向链表
+结构体的结点数据类型定义如下：
+
+typedef int ElemType;
+typedef struct Node{
+   ElemType data;
+   struct Node *prior,*next;
+}dbLinkList;
+课外自己去把这样的双向链表完整的定义，写出来，并上机测试！！！
+
+还可以自己设计和定义带头结点的双向循环链表
+
+栈和队列 
+
+
+push(a),push(b),push(c),pop(),push(d),pop(),pop(),pop()
+push(a),push(b),push(c),push(d),pop(),pop(),pop(),pop()
+push(a),pop(),push(b),push(c),pop(),push(d),pop(),pop()a,c,d,b
+栈的操作：
+  seqStack * InitStack();构造一个空栈s。
+    void DestroyStack(seqStack *s);销毁栈s。释放栈s占用的存储空间。
+  int stackEmpty(seqStack *s)：判断栈s是否为空:若栈s为空，则返回1；否则返回0。
+  int Push(seqStack *s，ElemType e)：进栈。将元素e入栈，插入到栈s的顶部，作为新的栈顶元素。如果入栈(进栈)成功，返回1，否则返回0
+  Pop(&s，&e)：出栈。从栈s中退出栈顶元素，并将其值赋给e。
+  GetTop(s，&e)：取栈顶元素。返回当前的栈顶元素，并将其值赋给e。
+
+各种操作的算法实现=>存储结构
+栈的存储：顺序方式存储和链接方式存储
+顺序栈：以顺序方式存储的栈
+链栈：以链接方式存储的栈
+
+顺序栈：
+#include<stdio.h>
+#include<stdlib.h>
+#define Max 3
+typedef int ElemType;
+typedef struct Node{
+	ElemType data[Max];//用于存储栈中的元素
+	int top;//top表示栈顶元素的下标
+}seqStack;//假设栈底放在向量的低端
+
+seqStack * InitStack(){//构造一个空栈
+	//产生一个栈的结构体类型的结点空间，将其首地址赋值给一个顺序栈的指针变量s
+	seqStack *s=(seqStack *)malloc(sizeof(seqStack));
+	s->top=-1;
+	return s;
+}
+void DestroyStack (seqStack *s){//销毁栈。释放栈s占用的存储空间
+	free(s);
+}
+int stackEmpty(seqStack *s){//判断栈s是否为空:若栈s为空，则返回1；否则返回0
+	return (s->top==-1?1:0);
+}
+int Push(seqStack *s,ElemType e){
+	//进栈。将元素e入栈，插入到栈s的顶部，作为新的栈顶元素。
+	//如果入栈(进栈)成功，返回1，否则返回0
+	if(s->top>=Max-1){  printf("栈满，不能入栈\n");   return 0;}
+    s->data[++(s->top)]=e;
+	return 1;
+}
+int Pop(seqStack *s,ElemType *e){
+	//出栈:从栈s中退出栈顶元素，如果栈非空，出栈(退栈)成功，
+	//将原来的栈顶元素值赋给指针变量e的指向,并将s->top--，返回1.
+    //否则，返回0
+	if(s->top==-1) { printf("栈空，不能出栈\n");   return 0; }
+	*e=s->data[s->top];
+	s->top--;
+	return 1;
+}
+int GetTop(seqStack *s,ElemType *e){
+	//取栈顶元素:从栈s中取栈顶元素，如果栈非空，将栈顶元素值赋给指针变量e的指向,返回1.
+    //否则，返回0
+	if(s->top==-1) {printf("栈空，不能取栈顶元素\n");   return 0;}
+	*e=s->data[s->top];
+	return 1;
+}
+int main(){
+	seqStack * s = InitStack();
+	ElemType x;
+	int i;
+	for(i=0;i<4;i++){
+		printf("%d\n",Push(s,i+1));
+	}
+    printf("%d\n",Pop(s,&x));//1,top=1
+    printf("%d\n",x);//3
+	printf("%d\n",GetTop(s,&x));//1,top=1
+    printf("%d\n",x);//2
+	printf("%d\n",Pop(s,&x));//1,top=0
+    printf("%d\n",x);//2
+	printf("%d\n",Pop(s,&x));//1,top=-1
+    printf("%d\n",x);//1
+    printf("%d\n",Pop(s,&x));//0,top=-1
+    printf("%d\n",x);//1
+	free(s);
+	return 0;
+}
+
+1
+1
+1
+栈满，不能入栈
+0
+1
+3
+1
+2
+1
+2
+1
+1
+栈空，不能出栈
+0
+1
+Press any key to continue
+
+课外分析，并且独立写出以上的代码
+
+模仿该算法，写出栈底放在向量的高端，其完整的算法代码
+
+

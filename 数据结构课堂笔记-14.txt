@@ -1,0 +1,479 @@
+数据结构课堂笔记-14
+
+清华大学：严蔚敏，
+模式串："aaaab"
+母串："aaacbaaabaaaaaabaac"
+
+模式串："abcdabce"
+next[8]:{0,0,0,0,1,2,3,0}//未右移1位，原始的next数组,j=next[j-1]
+右移1位：next[8]={-1,0,0,0,0,1,2,3}，j=next[j]
+将原始的next数组元素各自-1,在处理过程中，要还原(+1)
+
+
+"abcdabceabcdabcd"
+abcdabcd
+-1,0,0,0,0,1,2,3
+
+以下代码是KMP算法
+
+#include<stdio.h>
+#include<string.h> 
+#define Max 50
+typedef struct{//定义顺序栈 
+	char data[Max];
+	int length;
+}SqString;
+void InitString(SqString *str1,char *s2){//串初始化 
+	strcpy(str1->data,s2);
+	str1->length=strlen(s2);
+}
+int Index(SqString s,SqString t){//暴力(简单)匹配算法 
+	int i=0,j=0;
+	while(i<s.length && j<t.length){
+		if(s.data[i]==t.data[j]){ i++;j++;	}
+		else{ i=i-j+1;   j=0;		}
+	}
+	if(j>=t.length) return (i-t.length);
+	else return -1;
+}
+
+void GetNext(SqString t,int next[]){
+//由模式串t求出数组next各元素值，右移1位，将next[0]设置为-1 
+	int j=0,k=-1; 
+	next[0]=-1;	//next数组，采用右移1位的方法
+	while(j<t.length-1){//O(m) 
+		if(k==-1||t.data[j]==t.data[k]){//如果执行||的右边，则||左边必然为假 
+			j++;  k++;  next[j]=k;
+		}
+		else k=next[k];
+	} 
+}
+int KMPIndex(SqString s,SqString t){//KMP算法 ,next数组元素右移1位 
+	int next[Max],i=0,j=0;
+	GetNext(t,next);
+	while(i<s.length && j<t.length){
+		if(j==-1||s.data[i]==t.data[j]){
+			i++;  j++;
+		}
+		else j=next[j];
+	}
+	if(j>=t.length) return (i-t.length);
+	else return -1;
+}
+
+void GetNextval(SqString t,int nextval[]){
+//由模式串t求出数组nextval各元素值，数组元素右移1位 
+	int j=0,k=-1; 
+	nextval[0]=-1;
+	while(j<t.length){
+		if(k==-1||t.data[j]==t.data[k]){
+			j++;  k++;
+			if(t.data[j]!=t.data[k])
+				nextval[j]=k;
+			else
+				nextval[j]=nextval[k];
+		}
+		else
+			k=nextval[k];
+	}	
+} 
+int KMPIndex1(SqString s,SqString t){//改进的KMP算法，数组元素右移1位 
+	int nextval[Max],i=0,j=0;
+	GetNextval(t,nextval);
+	while(i<s.length && j<t.length){
+		if(j==-1 || s.data[i]==t.data[j]){
+			i++;  j++;
+		}
+		else  j=nextval[j];
+	}
+	if(j>=t.length)  return (i-t.length);
+	else return -1;
+}
+
+void GetNext2(SqString t,int next[]){//由模式串t求出数组next2各元素值 
+	int j=0,i; 
+	next[0]=0;
+	for(i=1;i<t.length;++i){
+		while(j>0 && t.data[i]!=t.data[j])
+			j=next[j-1];
+		if(t.data[i]==t.data[j]) j++;
+		next[i]=j;
+	} 
+}
+int KMPIndex2(SqString s,SqString t){//KMP算法2，next数组不右移1位 
+	int next[Max],i=0,j=0;
+	GetNext2(t,next);
+	while(i<s.length && j<t.length){
+		if(j==0&&s.data[i]!=t.data[j]||s.data[i]==t.data[j]){
+			i++;  j++;
+		}
+		else j=next[j-1];
+	}
+	if(j>=t.length) return (i-t.length);
+	else return -1;
+}
+void GetNext3(SqString t,int next[]){//由模式串t求出数组next3各元素值-1 
+	int j=0,i; 
+	next[0]=0;
+	for(i=1;i<t.length;++i){
+		while(j>0 && t.data[i]!=t.data[j])
+			j=next[j-1];
+		if(t.data[i]==t.data[j]) j++;
+		next[i]=j;
+	}
+	for(j=0;j<t.length;++j) next[j]-=1; 
+}
+int KMPIndex3(SqString s,SqString t){//KMP算法3，next3数组各元素-1 
+	int next[Max],i=0,j=0;
+	GetNext3(t,next);
+	while(i<s.length && j<t.length){
+		if(j==-1||s.data[i]==t.data[j]){
+			i++;  j++;
+		}
+		else j=next[j-1]+1;
+	}
+	if(j>=t.length) return (i-t.length);
+	else return -1;
+}
+int main(){
+	int j;
+	int next3[Max],next2[Max],next[Max],nextval[Max];
+	SqString s,t;
+	char s1[Max]="abcabcdabcdeabcdefabcdefg";
+	char t1[Max]="abcdeabcdefab";
+	InitString(&s,s1);
+	InitString(&t,t1);
+	printf("串s:%s\n",s.data);
+	printf("串t:%s\n",t.data);
+	printf("暴力匹配算法:\n");
+	printf("串t在串s中的起始下标=%d\n",Index(s,t));
+	GetNext3(t,next3);//由模式串t求出next3数组各元素值-1，不右移 
+	GetNext2(t,next2);//由模式串t求出next2数组各元素值，不右移 
+	GetNext(t,next);//由模式串t求出next数组各元素值,右移1位 
+	GetNextval(t,nextval);//由模式串t求出nextval数组各元素值 
+	printf("    j    ");
+	for(j=0;j<t.length;++j)
+		printf("%4d",j);
+	printf("\n");
+	printf(" t[j]    ");
+	for(j=0;j<t.length;++j)
+		printf("%4c",t.data[j]);
+	printf("\n");
+	printf("next3    ");
+	for(j=0;j<t.length;++j)
+		printf("%4d",next3[j]);
+	printf("\n");
+	printf("next2    ");
+	for(j=0;j<t.length;++j)
+		printf("%4d",next2[j]);
+	printf("\n");
+	printf("next     ");
+	for(j=0;j<t.length;++j)
+		printf("%4d",next[j]);
+	printf("\n");
+	printf("nextval  ");
+	for(j=0;j<t.length;++j)
+		printf("%4d",nextval[j]);
+	printf("\n");
+	printf("KMP算法-next数组元素-1，不右移：\n");
+	printf("串t在串s中的起始下标=%d\n\n",KMPIndex3(s,t));
+	printf("KMP算法-next数组不右移：\n");
+	printf("串t在串s中的起始下标=%d\n\n",KMPIndex2(s,t));	
+	printf("KMP算法-next数组右移1位：\n");
+	printf("串t在串s中的起始下标=%d\n\n",KMPIndex(s,t));	
+	printf("改进的KMP算法，数组元素右移1位：\n");
+	printf("串t在串s中的起始下标=%d\n\n",KMPIndex1(s,t));	
+	return 0;
+}
+
+迷宫问题算法，可基于栈，也可基于队列存储，有现在2种不同的算法实现！
+
+用队列，可采用广度优先遍历，直接求最短路径 
+用栈存储，求出的不一定是最短路径。但也可以求出各种不同的路径，并选出最短路径！
+
+迷宫问题，主要是掌握栈和队列的应用！
+
+
+以下是以栈为存储结构的迷宫算法
+#include<stdio.h>
+#define Max 100
+#define M 8
+#define N 8
+//int mg[M+2][N+2];
+int mg[M+2][N+2]={{1,1,1,1,1,1,1,1,1,1},{1,0,0,1,0,0,0,1,0,1},
+{1,0,0,1,0,0,0,1,0,1},{1,0,0,0,0,1,1,0,0,1},{1,0,1,1,1,0,0,0,0,1},
+{1,0,0,0,1,0,0,0,0,1},{1,0,1,0,0,0,1,0,0,1},{1,0,1,1,1,0,1,1,0,1},
+{1,1,0,0,0,0,0,0,0,1},{1,1,1,1,1,1,1,1,1,1}};
+typedef struct{
+	int i,j,di;
+}Box;
+typedef struct{
+	Box data[Max];
+	int top;
+}StType;
+void InitMg(){
+	printf("在迷宫的四面各添一堵墙，初始化用于存储迷宫的二维数组\n");
+	/*printf("请按矩阵方式依次输入二维数组元素值：");
+	int i,j;
+	for(i=0;i<M+2;++i)
+		for(j=0;j<N+2;++j)
+			scanf("%d",&mg[i][j]);
+	*/
+}
+int mgPath(int xi,int yi,int xe,int ye){
+	int i,j,k,di,find;
+	StType st;
+	st.top=-1;
+	st.top++;
+	st.data[st.top].i=xi;
+	st.data[st.top].j=yi;
+	st.data[st.top].di=-1;
+	mg[xi][yi]=-1;
+	while(st.top>-1){
+		i=st.data[st.top].i;
+		j=st.data[st.top].j;
+		di=st.data[st.top].di;
+		if(i==xe&&j==ye){
+			printf("迷宫路径如下：\n");
+			for(k=0;k<=st.top;k++){
+				printf("\t(%d,%d)",st.data[k].i,st.data[k].j);
+				if((k+1)%5==0) printf("\n");
+			}
+			printf("\n");
+			return 1; 
+		}
+		find=0;
+		while(di<4&&find==0){
+			di++;
+			switch(di){
+				case 0:i=st.data[st.top].i-1; j=st.data[st.top].j; break;
+				case 1:i=st.data[st.top].i; j=st.data[st.top].j+1; break;
+				case 2:i=st.data[st.top].i+1; j=st.data[st.top].j; break;
+				case 3:i=st.data[st.top].i; j=st.data[st.top].j-1; 
+			}
+			if(mg[i][j]==0) find=1;
+		}
+		if(find==1){
+			st.data[st.top].di=di;
+			st.top++;
+			st.data[st.top].i=i;
+			st.data[st.top].j=j;
+			st.data[st.top].di=-1;
+			mg[i][j]=-1;
+		}
+		else{
+			mg[st.data[st.top].i][st.data[st.top].j]=0;	
+			st.top--;
+		}
+	}
+	return 0;
+}
+int main(){
+	InitMg();
+	if(!mgPath(1,1,M,N)){
+		printf("该迷宫问题没有解！\n");
+	}
+	return 0;
+}
+
+
+
+以下是用栈示迷宫问题的所有路径及最短路径算法
+//用栈求解迷宫问题的所有路径及最短路径算法代码 
+#include<stdio.h>
+#define M 4
+#define N 4
+#define Max 100
+int mg[M+2][N+2]={{1,1,1,1,1,1},{1,0,0,0,1,1},{1,0,1,0,0,1},
+	{1,0,0,0,1,1},{1,1,0,0,0,1},{1,1,1,1,1,1}};
+	//一个迷宫，四周加上均为1的外框 
+struct{
+	int i,j;
+	int di;
+}St[Max],Path[Max];           //定义栈和存放最短路径的数组 
+int top=-1;                   //栈顶指针 
+int count=1;                  //路径计数器 
+int minlen=Max;               //最短路径长度
+void dispapath(){             //输出一条路径并求最短路径 
+	int k;
+	printf("%5d:",count++);    //输出第count条路径 
+	for(k=0;k<=top;k++)
+		printf("(%d,%d)",St[k].i,St[k].j); 
+	printf("\n");
+	if(top+1<minlen){            //比较找最短路径 
+		for(k=0;k<=top;++k)
+			Path[k]=St[k];       //将最短路径存放在Path中 
+		minlen=top+1;            //将最短路径长度存放在minlen中 
+	}
+}
+void dispminpath(){             //输出第1条最短路径 
+	int k;
+	printf("最短路径如下：\n"); 
+	printf("长度:%d\n",minlen);
+	printf("路径:");
+	for(k=0;k<minlen;++k)
+		printf("(%d,%d)",Path[k].i,Path[k].j);
+	printf("\n");
+}
+void mgpath(int xi,int yi,int xe,int ye){  //求迷宫路径 
+	int i,j,i1,j1,di;
+	int find;
+	top++;                             //进栈 
+	St[top].i=xi;  	St[top].j=yi;
+	St[top].di=-1;  mg[xi][yi]=-1;     //初始方块进栈
+	while(top>-1){                     //栈非空时循环 
+		i=St[top].i;  j=St[top].j; di=St[top].di;//取栈顶方块(i,j) 
+		if(i==xe &&j==ye){               //找到了出口
+			dispapath();                 //输出一条路径 
+			mg[i][j]=0;                  //让出口变为其他路径可走方块
+			top--;                        //出口退栈，即回退一个方块 
+			i=St[top].i;  j=St[top].j; di=St[top].di;
+			//让栈顶方块变为当前方块 
+		}
+		find=0;//找下一个可走方块(i1,j1)
+		while(di<4&&!find){
+			di++;
+			switch(di){
+				case 0:i1=i-1; j1=j; break;
+				case 1:i1=i; j1=j+1; break;
+				case 2:i1=i+1; j1=j; break;
+				case 3:i1=i; j1=j-1;
+			}
+			if(mg[i1][j1]==0) find=1;
+		} 
+		if(find){                  //找到了下一个可走方块 
+			St[top].di=di;         //修改原栈顶元素的di值 
+			top++;	St[top].i=i1;   St[top].j=j1;
+			St[top].di=-1;         //下一个可走方块(i1,j1)进栈
+			mg[i1][j1]=-1;       //避免重复走到该方块 
+		}
+		else{                   //没有路径可走，则(i,j)方块退栈 
+			mg[i][j]=0;         //让该位置变为其他路径可走方块 
+			top--;
+		}
+	}
+	dispminpath();	           //输出最短路径 
+}
+
+int main(){
+	printf("迷宫所有路径如下：\n");
+	mgpath(1,1,M,N);
+	return 0;
+}
+
+以下是以队列为存储结构的迷宫算法
+//迷宫算法-队列存储
+#include<stdio.h>
+#define Max 100
+#define M 8
+#define N 8
+//int mg[M+2][N+2];
+int mg[M+2][N+2]={{1,1,1,1,1,1,1,1,1,1},{1,0,0,1,0,0,0,1,0,1},
+{1,0,0,1,0,0,0,1,0,1},{1,0,0,0,0,1,1,0,0,1},{1,0,1,1,1,0,0,0,0,1},
+{1,0,0,0,1,0,0,0,0,1},{1,0,1,0,0,0,1,0,0,1},{1,0,1,1,1,0,1,1,0,1},
+{1,1,0,0,0,0,0,0,0,1},{1,1,1,1,1,1,1,1,1,1}};
+typedef struct{
+	int i,j,pre;
+}Box;
+typedef struct{
+	Box data[Max];
+	int front,rear;
+}QuType;
+typedef struct{
+	int index,i,j,pre;
+}Box2;
+void print(QuType sq,int front){
+	if(front!=-1){
+		print(sq,sq.data[front].pre);
+		printf("(%d,%d)\n",sq.data[front].i,sq.data[front].j);
+	}
+}
+void print2(QuType sq,int front){
+	//Box2 Index[Max],k=0,i;
+	Box2 Index[Max];
+	int k=0,i;
+	Index[k].index=front;
+	Index[k].i=sq.data[front].i;
+	Index[k].j=sq.data[front].j;
+	Index[k].pre=sq.data[front].pre;
+	k++;
+	while(Index[k-1].pre!=-1){
+		Index[k].index=Index[k-1].pre;
+		Index[k].i=sq.data[Index[k].index].i;
+		Index[k].j=sq.data[Index[k].index].j;
+		Index[k].pre=sq.data[Index[k].index].pre;
+		k++;
+	}
+	printf("迷宫路径如下:\n");
+	for(i=0;i<k;++i){
+		printf("\t(%d,%d)",Index[k-1-i].i,Index[k-1-i].j);
+		if((i+1)%5==0)  printf("\n");
+	}
+	printf("\n");
+}
+void InitMg(){
+	printf("在迷宫的四面各添一堵墙，初始化用于存储迷宫的二维数组\n");
+	/*printf("请按矩阵方式依次输入二维数组元素值：");
+	int i,j;
+	for(i=0;i<M+2;++i)
+		for(j=0;j<N+2;++j)
+			scanf("%d",&mg[i][j]);
+	*/
+	
+}	
+int mgPath2(int xi,int yi,int xe,int ye){
+	//搜索路径(xi,yi)->(xe,ye)
+	int i,j,find=0,di; 
+	QuType qu;//定义顺序队列
+	qu.front=qu.rear=-1;
+	qu.rear++;
+	qu.data[qu.rear].i=xi;
+	qu.data[qu.rear].j=yi;
+	qu.data[qu.rear].pre=-1;
+	mg[xi][yi]=-1;
+	while(qu.front!=qu.rear){
+		qu.front++;
+		i=qu.data[qu.front].i;
+		j=qu.data[qu.front].j;
+		if(i==xe&&j==ye){
+			find=1;
+			//print(qu,qu.front);
+			print2(qu,qu.front);
+			return 1; 
+		}
+		for(di=0;di<4;++di){
+			switch(di){
+				case 0:i=qu.data[qu.front].i-1;
+					   j=qu.data[qu.front].j;
+					   break;
+				case 1:i=qu.data[qu.front].i;
+					   j=qu.data[qu.front].j+1;
+					   break;
+				case 2:i=qu.data[qu.front].i+1;
+					   j=qu.data[qu.front].j;
+					   break;
+				case 3:i=qu.data[qu.front].i;
+					   j=qu.data[qu.front].j-1;
+			}
+			if(mg[i][j]==0){
+				qu.rear++;
+				qu.data[qu.rear].i=i;
+				qu.data[qu.rear].j=j;
+				qu.data[qu.rear].pre=qu.front;
+				mg[i][j]=-1;
+			}
+		}
+	} 
+	return 0; 
+}
+int main(){
+	InitMg();
+	if(!mgPath2(1,1,M,N)){
+		printf("该迷宫问题没有解！\n");
+	}
+	return 0;
+}
+
+
+
+递归函数调用时，系统内部是采用栈的原理

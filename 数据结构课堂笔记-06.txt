@@ -1,0 +1,188 @@
+数据结构课堂笔记-06
+
+//不带头结点的单链表
+#include<stdio.h>
+typedef char ElemType;
+typedef struct Node{
+    ElemType data;
+    struct Node *next;
+}LinkListNoHeader;
+
+LinkListNoHeader *IniLinkList() {
+    LinkListNoHeader *L=NULL;
+    return L; 
+}
+LinkListNoHeader * CreateLinkList(ElemType a[],int n){
+    LinkListNoHeader *L=NULL,*s;
+    int i;
+    for(i=0;i<n;++i){
+	s=(LinkListNoHeader *)malloc(sizeof(struct Node));
+	s->data=a[i];
+	s->next=L;
+	L=s;
+    }
+    return L;	
+}
+void Release(LinkListNoHeader *L){
+    LinkListNoHeader *p=L;
+    while(p){
+        L=L->next;
+        free(p);
+        p=L;
+    }
+}
+int Length(LinkListNoHeader *L){
+    int count=0;
+    LinkListNoHeader *p=L;
+    while(p){
+	count++;
+	p=p->next;
+    }
+    return count;//当天讲解时少了该语句 
+}
+int Empty(LinkListNoHeader *L){
+    return (!L?1:0);
+}
+int Get(LinkListNoHeader *L,int i,ElemType *x){
+    if(!L) {printf("表空，不能取值\n");   return 0;}
+    if(i<1){printf("位置不当，不能取值\n");   return 0;}
+    int count=1;
+    LinkListNoHeader *p =L;
+    while(p&&count<i){
+	count++;
+	p=p->next;
+    }
+    if(p){
+	printf("%c\n",p->data);
+	*x=p->data;
+	return 1;
+    }
+    printf("位置不当，不能取值\n");   
+    return 0;
+}
+int Locate(LinkListNoHeader *L,ElemType x){//按值查找
+    LinkListNoHeader * p = L;
+    int count=1;
+    while(p&&p->data!=x){
+	count++;
+	p=p->next;
+    }
+    if(!p) return 0;
+    return count; 
+
+int Insert(LinkListNoHeader *L,int i,ElemType x) {
+    LinkListNoHeader *s,*p=L;
+    int count=1;
+    //在表L的第i位置上插入元素x 
+    if(i<1){ printf("位置不当，不能插入\n");  return 0;	}
+    if(i==1){
+	s=(LinkListNoHeader *)malloc(sizeof(LinkListNoHeader));
+	s->data=x;
+	s->next=L;
+	L=s;
+	return 1;
+    }
+    //....
+    while(p&&count<i-1){
+	count++;
+	p=p->next;
+    }
+    if(!p){ printf("位置不当，不能插入\n");  return 0;	}
+    s=(LinkListNoHeader *)malloc(sizeof(LinkListNoHeader));
+    s->data=x;
+    s->next=p->next;
+    p->next=s;
+    return 1;
+}
+int Delete(LinkListNoHeader *L,int i,ElemType *x){
+    //删除表L第i位置上的结点，如果删除成功，则将被删除结点中的元素赋值给*x，并且返回1;否则，返回0 
+    // ....自己完成代码 
+    LinkListNoHeader *p;
+    int count=1;
+    if(!L){ printf("空表，不能删除\n"); return 0;}
+    if(i<1){ printf("位置不当，不能删除\n"); return 0;}
+    p=L;
+    if(i==1){
+	L=L->next;
+        *x=p->data;
+	free(p);
+	return 1;
+    }
+    while(p&&count<i-1){
+	count++;
+	p=p->next;
+    }
+    if(p&&p->next){
+	LinkListNoHeader *q=p->next;
+	*x=q->data;
+	p->next=q->next;
+	free(q);
+	return 1;
+    }
+    printf("位置不当，不能删除\n");
+    return 0;
+}
+void printLinkList(LinkListNoHeader *L){
+    LinkListNoHeader *p=L;
+    while(p){ 
+	printf("%3c",p->data);
+	p=p->next;
+    }
+    printf("\n");
+}
+int main(){
+    char b[13]="Hello,World!";
+    char x='a';
+    int flag=0;
+    LinkListNoHeader *L1,*L2;
+    L1=IniLinkList();
+    L2=CreateLinkList(b,12);
+    printf("Length(L1)=%d,Empty(L1)=%d\n",Length(L1),Empty(L1));
+    printf("Length(L2)=%d,Empty(L2)=%d\n",Length(L2),Empty(L2));
+    printf("L2表各结点元素值依次为：");
+    printLinkList(L2);
+    flag=Get(L2,5,&x);
+    if(flag)
+	printf("获取表L2的第5个位置上的元素成功，值为：%c\n",x);
+    else printf("获取L2的第5个位置上的元素不成功\n"); 
+	printf("%d\n",Locate(L2,'y'));//查L2表中是否存在元素值为'y' 
+	
+    Release(L1);
+    Release(L2);
+    return 0;
+}
+
+
+//带头结点的循环单链表，只设尾指针变量
+#include<stdio.h>
+typedef double ElemType;
+typedef struct Node{
+    ElemType data;
+    struct Node *next;
+}CirLinkListHeader;
+
+CirLinkListHeader * IniLinkList(){
+    CirLinkListHeader *rear =(CirLinkListHeader *)malloc(sizeof(CirLinkListHeader));
+    rear->next=rear;
+    return rear;	
+}
+CirLinkListHeader * CreateLinkList(ElemType a[],int n){
+    CirLinkListHeader *s,*rear =(CirLinkListHeader *)malloc(sizeof(CirLinkListHeader));
+    rear->next=rear;
+    int i=0;
+    for(;i<n;++i){
+	s=(CirLinkListHeader *)malloc(sizeof(CirLinkListHeader));
+	s->data=a[i];
+	//将s->next指向头结点，即将头结点的地址赋值给s->next变量
+	s->next=rear->next;
+	//将rear->next指向s,即将s值赋值给rear->next
+	rear->next=s;
+	//将rear指向s,即将s的值赋值给rear
+	rear=s; 
+     }
+     return rear;
+}
+/*
+在这基础上，自行完成带头结点的循环单链表的其它的各个函数的算法及程序代码，
+并上机测试 
+*/

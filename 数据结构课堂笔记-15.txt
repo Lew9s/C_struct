@@ -1,0 +1,127 @@
+数据结构课堂笔记-15
+
+稀疏矩阵：M*N,只有少量的非0元素，其余元素值为0
+采用压缩存储技术，三元组表，十字链表
+
+PPT上的例题，6*7，只有7个非0元素，只需要存储这7个非0元素即可
+每个非0元素，需要存储它所在的行下标，列下标及非0元素值
+#define Max 10
+typedef int ElemType;
+typedef struct{  
+   int r,c;
+   ElemType d;
+}TupNode;
+typedef struct{
+   int rows,cols;//稀疏矩阵的行数，列数
+   int nums;     //非0元素个数
+   TupNode data[Max];//数组元素表示每个非0元素的行下标、列下标及非0元素值，以行为主，存储每个非0元素
+}TSMatrix;
+
+TSMatrix *  InitTSMatrix(int r,int c,int n){//稀疏矩阵初始化
+   int k;
+   TSMatrix *tsm=(TSMatrix *)malloc(sizeof(TSMatrix));
+   tsm->rows=r;  tsm->cols=c;  tsm->nums=n;
+   printf("以行为主，依次输出每个非0元素的行下标、列下标、非0元素值：\n");
+   for(k=0;k<n;++k)
+       scanf("%d%d%d",&tsm->data[k].r,&tsm->data[k].c,&tsm->data[k].d);
+   return tsm;
+}
+
+转置：
+
+col:0~tsm->cols-1
+  扫描原矩阵中列下标为col的所有非0元素
+
+原矩阵数组的下标k1:0~tsm->nums-1
+int k=0,k1,col=0;
+while(col<tsm->cols){
+    k1=0;
+    while(k1<tsm->nums){
+        if(tsm->data[k1].c==col){
+            tsm1->data[k].r=tsm->data[k1].c;
+            tsm1->data[k].c=tsm->data[k1].r;
+            tsm1->data[k].d=tsm->data[k1].d;
+            ++k;
+        }
+        ++k1;
+    }
+    col++;
+}
+
+完整代码如下：
+#include<stdio.h>
+#define Max 10
+typedef int ElemType;
+typedef struct{  
+   int r,c;
+   ElemType d;
+}TupNode;
+typedef struct{
+   int rows,cols;//稀疏矩阵的行数，列数
+   int nums;     //非0元素个数
+   TupNode data[Max];//数组元素表示每个非0元素的行下标、列下标及非0元素值，以行为主，存储每个非0元素
+}TSMatrix;
+
+TSMatrix *  InitTSMatrix(int r,int c,int n){//稀疏矩阵初始化
+   int k;
+   TSMatrix *tsm=(TSMatrix *)malloc(sizeof(TSMatrix));
+   tsm->rows=r;  tsm->cols=c;  tsm->nums=n;
+   printf("以行为主，依次输出每个非0元素的行下标、列下标、非0元素值：\n");
+   for(k=0;k<n;++k)
+       scanf("%d%d%d",&tsm->data[k].r,&tsm->data[k].c,&tsm->data[k].d);
+   return tsm;
+}
+void printTSMatrix(TSMatrix *tsm) {
+	printf("该稀疏矩阵的行数、列数及非0元素个数依次为：%d,%d,%d\n",tsm->rows,tsm->cols,tsm->nums);
+	printf("以行为主，每个非0元素的行下标、列下标及非0元素值分布如下：\n");
+	int k=0;
+	while(k<tsm->nums){
+		printf("%4d%4d%4d\n",tsm->data[k].r,tsm->data[k].c,tsm->data[k].d);
+		k++;
+	}
+}
+void releaseTSMatrix(TSMatrix *tsm){
+	free(tsm);
+}
+TSMatrix *tranSMatrix(TSMatrix *tsm){
+	TSMatrix *tsm1;
+	tsm1=(TSMatrix *)malloc(sizeof(TSMatrix));	
+	tsm1->cols=tsm->rows;
+	tsm1->rows=tsm->cols;
+	tsm1->nums=tsm->nums;
+	int k=0,k1,col=0;
+	while(col<tsm->cols){
+    	k1=0;
+    	while(k1<tsm->nums){
+        	if(tsm->data[k1].c==col){
+            	tsm1->data[k].r=tsm->data[k1].c;
+            	tsm1->data[k].c=tsm->data[k1].r;
+            	tsm1->data[k].d=tsm->data[k1].d;
+            	++k;
+        	}
+        	++k1;
+    	}
+    	col++;
+	}
+    return tsm1;
+}
+int main(){
+	TSMatrix *tsm,*tsm1;//定义指向稀疏矩阵的指针变量
+	tsm=InitTSMatrix(6,7,7);
+	printTSMatrix(tsm);
+	tsm1=tranSMatrix(tsm);
+	printf("转置后的矩阵如下：\n");
+	printTSMatrix(tsm1); 
+	free(tsm);
+	free(tsm1);
+	return 0;
+}
+
+程序=数据结构+算法
+计算机语言(规则，静态的，死板的，记牢)，小儿科
+算法，有易，有难，太灵活了，从易到难的变化跨度可以很大！！！
+基于具体的数据结构，只要把算法设计出来，很轻松地用语言描述算法
+
+
+
+

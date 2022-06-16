@@ -1,0 +1,77 @@
+数据结构课堂笔记-13
+串的匹配，
+模式串1："aaaab",  next[5]:0,1,2,3,0，右移1位，next[0]=-1,next:-1,0,1,2,3  不右移，在原始next数据-1，next[5]={-1,0,1,2,-1}
+模式串2："abcdabce",  next[8]:0,0,0,0,1,2,3,0,右移1位：-1,0,0,0,0,1,2,3   不右移，在原始next数据-1，    next[8]={-1,-1,-1,-1,0,1,2,-1}
+next数组有3种方式构建
+
+
+a[M][N]
+Loc(aij)=Loc(a11)+(i-1)*N+j-1
+特殊矩阵的压缩存储技术 
+
+1对称矩阵：aij==aji
+
+1  2   3   4   5
+2  4   7   6  8
+3  7   5   9   4
+4  6   9   11 2
+5  8   4   2   7
+以主对角线对称的
+a[N][N]:N*N个元素的存储空间,压缩存储，可以是上三角，也可以下三角来存储。
+以下三角为例，第1行，存储1个，a11; 第2行存储2个,a21,a22，...,第i行，存储i个
+总的个数1+2+...+N=N*N/2+N/2
+Loc(aij)=>Loc(a11)+??
+
+当j<=i时：
+第i行，上面有i-1行，共有1+2+...+i-1=i*(i-1)/2
+第j列，左边有j-1列
+a11=>aij,需要偏移的元素个数：i*(i-1)/2+(j-1)
+Loc(aij)=Loc(a11)+i*(i-1)/2+(j-1)
+如果j>i时,aij=aji
+Loc(aij)=Loc(a11)+j*(j-1)/2+(i-1)
+设I=max(i,j),J=min(i,j)
+
+L(aij)=Loc(a11)+I*(I-1)+(J-1)
+
+同理，推导出采用上三角存储时，L(aij)=Loc(a11)+???
+
+2三角矩阵
+2-1下三角矩阵
+
+2-2上三角矩阵
+
+3对角矩阵(一般了解)
+
+4稀疏矩阵：M*N,只有少量的非0元素，其余元素值为0
+采用压缩存储技术，三元组表，十字链表
+
+PPT上的例题，6*7，只有7个非0元素，只需要存储这7个非0元素即可
+每个非0元素，需要存储它所在的行下标，列下标及非0元素值
+typedef int ElemType;
+typedef struct{  
+   int r,c;
+   ElemType d;
+}TupNode;
+typedef struct{
+   int rows,cols;
+   int nums;
+   TupNode data[Max];
+}TSMatrix;
+TSMatrix *  InitTSMatrix(int r,int c,int n){//稀疏矩阵初始化
+   int k;
+   TSMatrix *tsm=(TSMatrix *)malloc(sizeof(TSMatrix));
+   tsm->rows=r;  tsm->clos=c;  tsm->nums=n;
+   printf("以行为主，依次输出每个非0元素的行下标、列下标、非0元素值：\n");
+   for(k=0;k<n;++k)
+       scanf("%d%d%d",&tsm->data[k].r,&tsm->data[k].c,&tsm->data[k].d);
+   return tsm;
+}
+
+
+
+
+
+
+
+
+

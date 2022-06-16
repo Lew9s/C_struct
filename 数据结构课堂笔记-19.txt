@@ -1,0 +1,192 @@
+数据结构课堂笔记-19
+接上一讲继续
+为了测试，先定义3种遍历函数
+void preOrder(struct biNode *rt) {//先根(序)遍历以rt指向的结点为根的二叉树 
+	if(rt){
+		printf("%2c",rt->data);//输出根结点的名称 
+		preOrder(rt->lChild);//先根遍历左子树 
+		preOrder(rt->rChild);//先根遍历右子树
+	}
+	//else return; 
+}
+void inOrder(struct biNode *rt) {//中根(序)遍历以rt指向的结点为根的二叉树 
+	if(rt){
+		inOrder(rt->lChild);//中根遍历左子树 
+		printf("%2c",rt->data);//输出根结点的名称
+		inOrder(rt->rChild);//中根遍历右子树
+	}
+}
+void postOrder(struct biNode *rt) {//后根(序)遍历以rt指向的结点为根的二叉树 
+	if(rt){
+		postOrder(rt->lChild);//后根遍历左子树 
+		postOrder(rt->rChild);//后根遍历右子树
+		printf("%2c",rt->data);//输出根结点的名称
+	}
+}
+还需要定义销毁二叉树的算法
+void deleteBiTree(struct biNode *rt){//销毁以rt指向的结点为根结点的二叉树 
+	if(rt){//如果rt非空 
+		deleteBiTree(rt->lChild);//销毁左子树
+		deleteBiTree(rt->rChild);//销毁右子树
+		free(rt);//释放根结点 
+	}
+	//else return;
+}
+此外，还可以定义求二叉树高度、求所有叶子结点个数、求所有结点个数的函数
+int hight(struct biNode *rt){//求二叉树高度
+	if(!rt) return 0;
+	else if(rt->lChild==NULL&&rt->rChild==NULL) return 1;
+	     else{
+	     	int lh=hight(rt->lChild);
+	     	int rh=hight(rt->rChild);
+		 	return (1+(lh>=rh?lh:rh));
+		 }
+}
+
+int allLeafNodeNum(struct biNode *rt)//求二叉树中所有叶子结点个数
+    if(!rt) return 0;
+    else if(rt->lChild==NULL&&rt->rChild==NULL) return 1;
+           else return allLeafNodeNum(rt->lChild)+allLeafNodeNum(rt->rChild);
+}
+int allNodeNum(struct biNode *rt){//求二叉树所有结点个数 
+     if(!rt) return 0;
+    else if(rt->lChild==NULL&&rt->rChild==NULL) return 1;
+           else 1+allNodeNum(rt->lChild)+allNodeNum(rt->rChild);
+}
+再定义层序遍历函数的算法
+需要用到队列，算法的设计过程见录屏视频
+void levelOrder(struct biNode *rt){//层序遍历以rt指向的结点为根的二叉树
+	struct biNode *Q[Max],*s;
+	int front=-1,rear=-1; 
+	if(!rt) return;
+	Q[++rear]=rt;
+	while(front!=rear){
+		s=Q[++front];
+		printf("%2c",s->data);
+		if(s->lChild) Q[++rear]=s->lChild;
+		if(s->rChild) Q[++rear]=s->rChild;
+	}
+	printf("\n");
+}
+
+二叉树的完整测试代码如下：
+//二叉树完整测试代码 biTree.c 
+#include<stdio.h>
+#define Max 16
+typedef char ElemType;
+struct biNode{
+    ElemType data;//结点名称
+    struct biNode *lChild,*rChild;
+};
+struct biNode * CreateBiTree(){
+    char ch;
+    struct biNode *Q[Max],*root=NULL,*s;
+    int front=1,rear=0;//rear当前结点的下标，front是当前结点双亲结点的下标
+    printf("添加虚结点，变成完全二叉树，");
+    printf("按完全二叉树层序遍历序列依次输入每个结点名称,");
+    printf("虚结点用'@'表示,结束用'#'表示\n");
+    scanf("%c",&ch);
+    while(ch!='#'){
+	s=NULL;
+	if(ch!='@'){
+	    s=(struct biNode *)malloc(sizeof(struct biNode));
+	    s->data=ch;
+	    s->rChild=s->lChild=NULL;
+	}
+	Q[++rear]=s;//当前结点入队 
+	if(rear==1) root=s;//如果是第1个结点，则作为根结点,不必找双亲 
+	else{
+	    if(s)
+	    if(rear%2==0)  Q[front]->lChild=s;
+	    else Q[front]->rChild=s;
+	    if(rear%2)//如果rear为右数，当前结双亲右孩子出现过了，队列中的下一个结点作为新双亲
+	        front++; 
+	} 
+	scanf("%c",&ch);
+    }
+    return root; 
+}
+void deleteBiTree(struct biNode *rt){//销毁以rt指向的结点为根结点的二叉树 
+	if(rt){//如果rt非空 
+		deleteBiTree(rt->lChild);//销毁左子树
+		deleteBiTree(rt->rChild);//销毁右子树
+		free(rt);//释放根结点 
+	}
+	//else return;
+}
+void preOrder(struct biNode *rt) {//先根(序)遍历以rt指向的结点为根的二叉树 
+	if(rt){
+		printf("%2c",rt->data);//输出根结点的名称 
+		preOrder(rt->lChild);//先根遍历左子树 
+		preOrder(rt->rChild);//先根遍历右子树
+	}
+	//else return; 
+}
+void inOrder(struct biNode *rt) {//中根(序)遍历以rt指向的结点为根的二叉树 
+	if(rt){
+		inOrder(rt->lChild);//中根遍历左子树 
+		printf("%2c",rt->data);//输出根结点的名称
+		inOrder(rt->rChild);//中根遍历右子树
+	}
+}
+void postOrder(struct biNode *rt) {//后根(序)遍历以rt指向的结点为根的二叉树 
+	if(rt){
+		postOrder(rt->lChild);//后根遍历左子树 
+		postOrder(rt->rChild);//后根遍历右子树
+		printf("%2c",rt->data);//输出根结点的名称
+	}
+}
+void levelOrder(struct biNode *rt){//层序遍历以rt指向的结点为根的二叉树
+	struct biNode *Q[Max],*s;
+	int front=-1,rear=-1; 
+	if(!rt) return;
+	Q[++rear]=rt;
+	while(front!=rear){
+		s=Q[++front];
+		printf("%2c",s->data);
+		if(s->lChild) Q[++rear]=s->lChild;
+		if(s->rChild) Q[++rear]=s->rChild;
+	}
+	printf("\n");
+}
+int hight(struct biNode *rt){//求二叉树高度
+	if(!rt) return 0;
+	else if(rt->lChild==NULL&&rt->rChild==NULL) return 1;
+	     else{
+	     	int lh=hight(rt->lChild);
+	     	int rh=hight(rt->rChild);
+		 	//return (1+(lh>=rh?lh:rh));
+		 	if(lh>=rh) return 1+lh;
+		 	else return 1+rh;
+		 }
+}
+int allLeafNodeNum(struct biNode *rt){//求二叉树中所有叶子结点个数
+	if(!rt) return 0;
+	else if(rt->lChild==NULL&&rt->rChild==NULL) return 1;
+		 else return allLeafNodeNum(rt->lChild)+allLeafNodeNum(rt->rChild);
+}
+int allNodeNum(struct biNode *rt){//求二叉树所有结点个数 
+	 if (rt==NULL)   return 0;
+     else if(rt->lChild==NULL && rt->rChild==NULL)      return 1;
+          else return  1+allNodeNum(rt->lChild)+allNodeNum(rt->rChild);
+}
+int main(){
+	struct biNode *rt=CreateBiTree();
+	printf("先根(序)遍历序列：\n");
+	preOrder(rt);
+	printf("\n");
+	printf("中根(序)遍历序列：\n");
+	inOrder(rt);
+	printf("\n");
+	printf("后根(序)遍历序列：\n");
+	postOrder(rt);
+	printf("\n");
+	printf("层序遍历序列：\n");
+	levelOrder(rt);
+	printf("二叉树高度为:%d\n",hight(rt));
+	printf("二叉树所有叶子结点个数为:%d\n",allLeafNodeNum(rt));
+	printf("二叉树所有结点个数为:%d\n",allNodeNum(rt));
+	deleteBiTree(rt);//销毁二叉树 
+	return 0;
+} 
+
